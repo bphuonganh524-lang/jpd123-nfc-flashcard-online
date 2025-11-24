@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NFC Flashcard JPD123 (Online)</title>
+    <title>NFC Flashcard JPD123 (Vercel)</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,7 +14,7 @@
     <!-- Marked JS -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <!-- FIREBASE SDK (Quan trọng) -->
+    <!-- FIREBASE SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -62,8 +62,8 @@
         <section id="screen-login" class="p-6 flex flex-col justify-center min-h-screen hidden">
             <div class="text-center mb-8">
                 <div class="w-20 h-20 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-purple-500/30"><span class="text-4xl font-bold text-white">JP</span></div>
-                <h1 class="text-3xl font-bold mb-2">JPD123 Online</h1>
-                <p class="text-slate-400 text-sm">Học tiếng Nhật (Server Realtime)</p>
+                <h1 class="text-3xl font-bold mb-2">JPD123 Pro</h1>
+                <p class="text-slate-400 text-sm">Học tiếng Nhật (Online Realtime)</p>
             </div>
             <form id="login-form" class="space-y-4">
                 <div><label class="text-xs text-slate-400 uppercase">Họ và tên</label><input type="text" id="login-name" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 focus:border-purple-500 outline-none" required></div>
@@ -93,7 +93,7 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                     </span>
-                    Đang kết nối Server...
+                    Online
                 </div>
             </div>
 
@@ -109,8 +109,8 @@
                                 <i class="fas fa-chart-pie"></i>
                             </div>
                             <div class="text-left">
-                                <div class="font-bold text-sm">Tiến độ học sinh</div>
-                                <div class="text-xs text-slate-400">Theo dõi Realtime</div>
+                                <div class="font-bold text-sm">Tiến độ chi tiết</div>
+                                <div class="text-xs text-slate-400">Xem từng bài học</div>
                             </div>
                         </div>
                         <i class="fas fa-chevron-right text-slate-600"></i>
@@ -173,7 +173,7 @@
                 <button onclick="app.navigateTo('dashboard')" class="text-slate-400 hover:text-white">
                     <i class="fas fa-arrow-left mr-2"></i>Quay lại
                 </button>
-                <h2 class="font-bold text-lg">Tiến độ (Online)</h2>
+                <h2 class="font-bold text-lg">Tiến độ Chi tiết</h2>
 
                 <div class="relative">
                     <button onclick="document.getElementById('menu-progress-actions').classList.toggle('hidden')" class="text-slate-400 hover:text-white p-2">
@@ -306,7 +306,6 @@
 
     <!-- MAIN APP SCRIPT -->
     <script>
-        // --- 1. CẤU HÌNH FIREBASE (Dữ liệu của bạn) ---
         const firebaseConfig = {
             apiKey: "AIzaSyBtlslkylHhhhQCSL9fwxBK5QQpXwqp8rw",
             authDomain: "jpd123-flashcard.firebaseapp.com",
@@ -316,7 +315,6 @@
             messagingSenderId: "1085810162442",
             appId: "1:1085810162442:web:c69c3bd93a219fa2a118f3"
         };
-        // ----------------------------------------------------
 
         // Khởi động kết nối
         if (!firebase.apps.length) {
@@ -331,7 +329,6 @@
         const STUDENT_DOMAIN = '@fpt.edu.vn';
         const LESSONS = [4, 5, 6, 7];
 
-        // Fallback data
         window.SEED_DATA = [
             { id: 'hon', lesson: 4, kanji: '本', furigana: 'ほん', romaji: 'hon', vi: 'Sách', image: '', examples: [{jp: 'これは本です', vi: 'Đây là quyển sách'}] },
             { id: 'tegami', lesson: 5, kanji: '手紙', furigana: 'てがみ', romaji: 'tegami', vi: 'Bức thư', image: '', examples: [{jp: '手紙を書きます', vi: 'Tôi viết thư'}] },
@@ -394,11 +391,10 @@
                 $('inp-image-base64').value = base64;
                 $('preview-image').src = base64;
                 $('preview-image-container').classList.remove('hidden');
-                if(base64.length > 800000) showToast("Ảnh lớn, tải lên sẽ hơi lâu...");
             });
         };
 
-        const dataMgr = {
+        window.dataMgr = {
             exportData: () => {
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.db.words));
                 const el = document.createElement('a'); el.setAttribute("href", dataStr); el.setAttribute("download", "jpd123_data.json");
@@ -419,16 +415,15 @@
                 reader.readAsText(file); input.value = '';
             }
         };
-        window.dataMgr = dataMgr;
 
-        const geminiService = {
+        window.geminiService = {
             getKey: () => {
                 if (apiKey) return apiKey; if (userApiKey) return userApiKey;
                 const i = prompt("Nhập API Key Gemini (nếu có):");
                 if (i && i.trim()) { userApiKey = i.trim(); return userApiKey; } return null;
             },
             explainWord: async () => {
-                const key = geminiService.getKey(); if (!key) { alert("Chưa có Key AI."); return; }
+                const key = window.geminiService.getKey(); if (!key) { alert("Chưa có Key AI."); return; }
                 const w = window.session.studyList[window.session.currentIndex];
                 $('modal-ai').classList.remove('hidden');
                 $('ai-content').innerHTML = `<div class="flex flex-col items-center justify-center h-40"><div class="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div><p class="text-purple-300 mt-2">AI đang suy nghĩ...</p></div>`;
@@ -443,7 +438,7 @@
                 } catch (e) { $('ai-content').innerHTML = `Lỗi: ${e.message}`; }
             },
             generateExamples: async () => {
-                const key = geminiService.getKey(); if (!key) return alert("Chưa có Key AI.");
+                const key = window.geminiService.getKey(); if (!key) return alert("Chưa có Key AI.");
                 const k = $('inp-kanji').value; const m = $('inp-vi').value;
                 if(!k) return alert("Nhập Kanji đã!");
                 const btn = document.querySelector('.sparkle-btn'); btn.disabled = true;
@@ -460,26 +455,19 @@
             closeModal: () => $('modal-ai').classList.add('hidden')
         };
 
-        // --- 2. LOGIC ĐỒNG BỘ ONLINE ---
         window.loadData = () => {
             $('connection-status').innerHTML = '<span class="animate-pulse text-green-400">●</span> Online Mode';
-            
-            // Lắng nghe từ vựng
             dbRef.child('words').on('value', (snapshot) => {
                 const data = snapshot.val();
                 window.db.words = data ? Object.values(data) : [];
                 if(window.db.words.length === 0) window.db.words = [...window.SEED_DATA];
                 if (window.handleVocabUpdate) window.handleVocabUpdate();
             });
-
-            // Lắng nghe tiến độ tất cả (cho GV)
             dbRef.child('progress_all').on('value', (snapshot) => {
                 const data = snapshot.val();
                 window.__progressDocs = data ? Object.values(data) : [];
                 if (window.handleProgressUpdate) window.handleProgressUpdate(window.__progressDocs);
             });
-
-            // Lắng nghe tiến độ cá nhân (cho HS)
             const u = localStorage.getItem('jpd123_user');
             if(u) {
                 const user = JSON.parse(u);
@@ -491,7 +479,6 @@
             }
         };
 
-        // Ghi đè hàm lưu (chỉ lưu Cloud)
         window.saveData = () => {};
         window.saveProgress = () => {};
 
@@ -515,8 +502,7 @@
             }
         };
 
-        // --- 3. UI LOGIC ---
-        const app = {
+        window.app = {
             init: () => {
                 window.loadData();
                 const p = new URLSearchParams(location.search);
@@ -525,7 +511,7 @@
                 const u = localStorage.getItem('jpd123_user');
                 if(u) {
                     window.session.user = JSON.parse(u);
-                    app.checkRedirect();
+                    window.app.checkRedirect();
                 } else {
                     showScreen('screen-login');
                     $('login-email').oninput = (e) => {
@@ -543,7 +529,7 @@
                         if(!role) { $('login-spinner').classList.add('hidden'); return alert("Email không hợp lệ!"); }
                         window.session.user = { name: $('login-name').value, email: eVal, role, className: $('login-class').value || '' };
                         localStorage.setItem('jpd123_user', JSON.stringify(window.session.user));
-                        app.checkRedirect();
+                        window.app.checkRedirect();
                     }, 400);
                 };
                 $('example-inputs-container').innerHTML = Array(5).fill(0).map((_, i) => `<div class="bg-slate-800/50 p-2 rounded border border-slate-700/50 flex gap-2"><input id="inp-ex-jp-${i}" class="w-1/2 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs" placeholder="Câu Nhật"><input id="inp-ex-vi-${i}" class="w-1/2 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs" placeholder="Nghĩa Việt"></div>`).join('');
@@ -551,23 +537,23 @@
             },
             checkRedirect: () => {
                 if(window.session.nfcTarget) {
-                    if(window.db.words.length === 0) { setTimeout(app.checkRedirect, 500); return; }
+                    if(window.db.words.length === 0) { setTimeout(window.app.checkRedirect, 500); return; }
                     const w = window.db.words.find(x => x.id === window.session.nfcTarget.id && x.lesson === window.session.nfcTarget.lesson);
-                    if(w) { app.selectLesson(window.session.nfcTarget.lesson, window.session.nfcTarget.id); window.session.nfcTarget = null; return; }
+                    if(w) { window.app.selectLesson(window.session.nfcTarget.lesson, window.session.nfcTarget.id); window.session.nfcTarget = null; return; }
                 }
-                app.initDashboard();
+                window.app.initDashboard();
             },
             initDashboard: () => {
                 $('user-display-name').innerText = window.session.user.name;
                 $('user-role-display').innerText = window.session.user.role === 'teacher' ? 'Giáo viên (Online)' : `Học sinh - ${window.session.user.className || 'N/A'}`;
-                $('lesson-grid').innerHTML = LESSONS.map(n => `<div onclick="app.selectLesson(${n})" class="bg-slate-800 border border-slate-700 p-4 rounded-2xl flex flex-col items-center justify-center aspect-square hover:bg-slate-700 cursor-pointer active:scale-95"><div class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-xl font-bold shadow-lg mb-2">${n}</div><span class="font-bold text-slate-300">Bài ${n}</span></div>`).join('');
+                $('lesson-grid').innerHTML = LESSONS.map(n => `<div onclick="window.app.selectLesson(${n})" class="bg-slate-800 border border-slate-700 p-4 rounded-2xl flex flex-col items-center justify-center aspect-square hover:bg-slate-700 cursor-pointer active:scale-95"><div class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-xl font-bold shadow-lg mb-2">${n}</div><span class="font-bold text-slate-300">Bài ${n}</span></div>`).join('');
                 if(window.session.user.role === 'teacher') {
                     $('teacher-dashboard-controls').classList.remove('hidden');
                     $('student-dashboard-summary').classList.add('hidden');
                 } else {
                     $('teacher-dashboard-controls').classList.add('hidden');
                     $('student-dashboard-summary').classList.remove('hidden');
-                    app.renderStudentDashboardStats();
+                    window.app.renderStudentDashboardStats();
                 }
                 showScreen('screen-dashboard');
             },
@@ -588,28 +574,28 @@
                 window.session.currentLesson = n;
                 const w = window.db.words.filter(x => x.lesson === n);
                 if(window.session.user.role === 'teacher') {
-                    teacherMgr.init(n, w); showScreen('screen-teacher-manager');
+                    window.teacherMgr.init(n, w); showScreen('screen-teacher-manager');
                 } else {
                     if(!w.length) return showToast("Bài này chưa có từ vựng!");
-                    studentStudy.init(w, tid); showScreen('screen-student-study');
+                    window.studentStudy.init(w, tid); showScreen('screen-student-study');
                 }
             },
             navigateTo: (s) => {
-                if (s === 'dashboard') app.initDashboard();
+                if (s === 'dashboard') window.app.initDashboard();
                 else if (s === 'teacher-progress') { showScreen('screen-teacher-progress'); if (window.teacherStats) window.teacherStats.init(); }
                 else showScreen('screen-' + s);
             }
         };
 
-        const teacherMgr = {
+        window.teacherMgr = {
             currentWords: [],
-            init: (l, w) => { teacherMgr.currentWords = w; $('mgr-lesson-num').innerText = l; teacherMgr.renderList(); },
+            init: (l, w) => { window.teacherMgr.currentWords = w; $('mgr-lesson-num').innerText = l; window.teacherMgr.renderList(); },
             renderList: () => {
                 const listEl = $('teacher-word-list');
                 const baseUrl = location.origin + location.pathname;
-                listEl.innerHTML = teacherMgr.currentWords.map(w => {
+                listEl.innerHTML = window.teacherMgr.currentWords.map(w => {
                     const link = `${baseUrl}?lesson=${w.lesson}&id=${w.id}`;
-                    return `<div class="bg-slate-800/50 border border-slate-700 rounded-xl p-3 flex justify-between items-center"><div class="flex items-center gap-3">${w.image ? `<img src="${w.image}" class="w-10 h-10 rounded object-cover bg-slate-900">` : '<div class="w-10 h-10 rounded bg-slate-700 flex items-center justify-center text-xs text-slate-500">No img</div>'}<div><div class="font-bold text-lg font-jp">${w.kanji}</div><div class="text-xs text-slate-400">${w.vi}</div></div></div><div class="flex gap-2"><button onclick="teacherMgr.copyLink('${link}')" class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center"><i class="fas fa-link text-xs"></i></button><button onclick="teacherMgr.editWord('${w.id}')" class="w-8 h-8 rounded-full bg-blue-900/50 text-blue-400 flex items:center justify-center"><i class="fas fa-pen text-xs"></i></button><button onclick="teacherMgr.deleteWord('${w.id}')" class="w-8 h-8 rounded-full bg-red-900/50 text-red-400 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button></div></div>`;
+                    return `<div class="bg-slate-800/50 border border-slate-700 rounded-xl p-3 flex justify-between items-center"><div class="flex items-center gap-3">${w.image ? `<img src="${w.image}" class="w-10 h-10 rounded object-cover bg-slate-900">` : '<div class="w-10 h-10 rounded bg-slate-700 flex items-center justify-center text-xs text-slate-500">No img</div>'}<div><div class="font-bold text-lg font-jp">${w.kanji}</div><div class="text-xs text-slate-400">${w.vi}</div></div></div><div class="flex gap-2"><button onclick="window.teacherMgr.copyLink('${link}')" class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center"><i class="fas fa-link text-xs"></i></button><button onclick="window.teacherMgr.editWord('${w.id}')" class="w-8 h-8 rounded-full bg-blue-900/50 text-blue-400 flex items:center justify-center"><i class="fas fa-pen text-xs"></i></button><button onclick="window.teacherMgr.deleteWord('${w.id}')" class="w-8 h-8 rounded-full bg-red-900/50 text-red-400 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button></div></div>`;
                 }).join('');
             },
             copyLink: (u) => { if(navigator.clipboard) navigator.clipboard.writeText(u).then(()=>showToast("Đã copy link!")).catch(()=>prompt("Copy:", u)); else prompt("Copy:", u); },
@@ -634,17 +620,17 @@
                 for(let i=0; i<5; i++) { const j = $(`inp-ex-jp-${i}`).value; const v = $(`inp-ex-vi-${i}`).value; if(j && v) nw.examples.push({jp: j, vi: v}); }
                 showToast("Đang lưu lên server...");
                 const success = await window.cloud.saveWord(nw);
-                if(success) { showToast("Đã lưu!"); teacherMgr.closeModal(); }
+                if(success) { showToast("Đã lưu!"); window.teacherMgr.closeModal(); }
             },
             closeModal: () => $('modal-word').classList.add('hidden'),
             deleteWord: async (id) => { if(confirm("Xóa từ này khỏi Server?")) await window.cloud.deleteWord(id); }
         };
 
-        const studentStudy = {
+        window.studentStudy = {
             init: (w, tid) => {
                 window.session.studyList = [...w];
                 window.session.currentIndex = tid ? Math.max(0, window.session.studyList.findIndex(x => x.id === tid)) : 0;
-                studentStudy.render();
+                window.studentStudy.render();
             },
             render: () => {
                 const w = window.session.studyList[window.session.currentIndex]; if(!w) return;
@@ -660,8 +646,8 @@
                 setTimeout(() => speakJP(w.kanji), 500);
             },
             flipCard: () => { const c = $('flashcard-inner').parentElement; c.classList.toggle('card-flip'); if(c.classList.contains('card-flip')) speakJP(window.session.studyList[window.session.currentIndex].kanji); },
-            prevCard: () => { if(window.session.currentIndex > 0) { window.session.currentIndex--; studentStudy.render(); } },
-            nextCard: () => { if(window.session.currentIndex < window.session.studyList.length - 1) { window.session.currentIndex++; studentStudy.render(); } else showToast("Đã hết thẻ!"); },
+            prevCard: () => { if(window.session.currentIndex > 0) { window.session.currentIndex--; window.studentStudy.render(); } },
+            nextCard: () => { if(window.session.currentIndex < window.session.studyList.length - 1) { window.session.currentIndex++; window.studentStudy.render(); } else showToast("Đã hết thẻ!"); },
             markStatus: (s) => { 
                 const w = window.session.studyList[window.session.currentIndex];
                 const email = window.session.user.email;
@@ -669,12 +655,12 @@
                 window.db.progress[email][w.id] = { status: s, lastReviewed: Date.now() };
                 window.progressCloud.saveStudentProgress({ email: window.session.user.email, name: window.session.user.name, className: window.session.user.className || '', progress: window.db.progress[email] });
                 showToast("Đã lưu tiến độ!");
-                setTimeout(() => { if(window.session.currentIndex < window.session.studyList.length - 1) { window.session.currentIndex++; studentStudy.render(); } }, 300); 
+                setTimeout(() => { if(window.session.currentIndex < window.session.studyList.length - 1) { window.session.currentIndex++; window.studentStudy.render(); } }, 300); 
             },
             toggleShuffle: () => {
                 window.session.isShuffle = !window.session.isShuffle; $('btn-shuffle').classList.toggle('text-purple-400', window.session.isShuffle);
                 if(window.session.isShuffle) window.session.studyList.sort(() => Math.random() - 0.5); else window.session.studyList = window.db.words.filter(w => w.lesson === window.session.currentLesson);
-                window.session.currentIndex = 0; studentStudy.render();
+                window.session.currentIndex = 0; window.studentStudy.render();
             },
             playAudio: () => speakJP(window.session.studyList[window.session.currentIndex].kanji),
             toggleFav: () => { const i = $('fc-star'); i.classList.toggle('fas'); i.classList.toggle('far'); }
@@ -685,8 +671,8 @@
                 const scrMgr = $('screen-teacher-manager');
                 if (scrMgr && !scrMgr.classList.contains('hidden')) {
                     const currentLesson = window.session.currentLesson;
-                    teacherMgr.currentWords = currentLesson ? window.db.words.filter(w => w.lesson === currentLesson) : window.db.words;
-                    teacherMgr.renderList();
+                    window.teacherMgr.currentWords = currentLesson ? window.db.words.filter(w => w.lesson === currentLesson) : window.db.words;
+                    window.teacherMgr.renderList();
                 }
             }
             if (window.session.user?.role === 'student') {
@@ -697,7 +683,7 @@
                     const currentId = window.session.studyList[window.session.currentIndex]?.id;
                     window.session.studyList = [...wordsForLesson];
                     let newIndex = 0; if (currentId) { const idx = wordsForLesson.findIndex(w => w.id === currentId); if (idx !== -1) newIndex = idx; }
-                    window.session.currentIndex = newIndex; studentStudy.render();
+                    window.session.currentIndex = newIndex; window.studentStudy.render();
                 }
             }
         };
@@ -731,18 +717,54 @@
                 if (!all.length) return container.innerHTML = '<p class="text-xs text-slate-500 italic">Chưa có dữ liệu.</p>';
                 const currentClass = $('teacher-class-select').value;
                 const filtered = all.filter(s => !currentClass || (s.className || '') === currentClass);
+                
                 const totalWords = window.db.words.length || 1;
+                const wordMap = {};
+                window.db.words.forEach(w => wordMap[w.id] = w.lesson);
+                const lessonTotals = {};
+                LESSONS.forEach(l => lessonTotals[l] = 0);
+                window.db.words.forEach(w => { if(lessonTotals[w.lesson] !== undefined) lessonTotals[w.lesson]++; });
+
                 container.innerHTML = filtered.map(s => {
-                    const progress = s.progress || {}; const allIds = Object.keys(progress);
-                    let mastered = 0; allIds.forEach(id => { if (progress[id].status === 'mastered') mastered++; });
-                    return `<div class="bg-slate-800 border border-slate-700 rounded-xl p-4"><div class="flex justify-between mb-1"><h4 class="font-bold">${s.name || s.email}</h4><span class="text-xs text-slate-400">${s.email}</span></div><div class="text-xs text-slate-500 mb-2">Lớp: <span class="text-slate-300">${s.className || 'Chưa rõ'}</span></div><div class="w-full bg-slate-700 h-2 rounded-full mb-2"><div class="bg-green-500 h-2 rounded-full" style="width: ${Math.round((mastered/totalWords)*100)}%;"></div></div><div class="text-xs text-slate-400">Đã thuộc: <span class="text-green-400 font-bold">${mastered}/${totalWords}</span></div></div>`;
+                    const progress = s.progress || {}; 
+                    const allIds = Object.keys(progress);
+                    let mastered = 0; let reviewed = 0;
+                    const studentCounts = {};
+                    LESSONS.forEach(l => studentCounts[l] = 0);
+
+                    allIds.forEach(id => { 
+                        if (progress[id].status === 'mastered') {
+                            mastered++;
+                            const l = wordMap[id];
+                            if(l && studentCounts[l] !== undefined) studentCounts[l]++;
+                        } else if(progress[id].status === 'review') {
+                            reviewed++;
+                        }
+                    });
+
+                    const perLessonLines = LESSONS.map(l => {
+                        const count = studentCounts[l];
+                        const total = lessonTotals[l];
+                        if(!total) return ''; 
+                        
+                        let colorClass = 'text-slate-500';
+                        if(count === total && total > 0) colorClass = 'text-green-400 font-bold';
+                        else if(count > 0) colorClass = 'text-blue-400';
+
+                        return `<div class="flex justify-between border-b border-slate-700/50 py-1 last:border-0"><span>Bài ${l}</span><span class="${colorClass}">${count} / ${total}</span></div>`;
+                    }).join('');
+
+                    return `<div class="bg-slate-800 border border-slate-700 rounded-xl p-4"><div class="flex justify-between mb-1"><h4 class="font-bold">${s.name || s.email}</h4><span class="text-xs text-slate-400">${s.email}</span></div><div class="text-xs text-slate-500 mb-2">Lớp: <span class="text-slate-300">${s.className || 'Chưa rõ'}</span></div><div class="w-full bg-slate-700 h-2 rounded-full mb-2"><div class="bg-green-500 h-2 rounded-full" style="width: ${Math.round((mastered/totalWords)*100)}%;"></div></div><div class="flex justify-between text-xs text-slate-400"><span>Đã thuộc: <span class="text-green-400 font-bold">${mastered}/${totalWords}</span></span><span>Đã làm: <span class="text-blue-400 font-bold">${allIds.length}/${totalWords}</span></span></div><div class="text-[11px] text-slate-500 mt-1">Ôn lại: <span class="text-orange-400 font-semibold">${reviewed}</span></div><div class="mt-2 text-[11px] text-slate-400 border-t border-slate-700 pt-2 leading-snug">${perLessonLines}</div></div>`;
                 }).join('');
             }
         };
-        window.handleProgressUpdate = (docs) => { window.teacherStats.allStudents = docs || []; if ($('screen-teacher-progress').classList.contains('hidden') === false) window.teacherStats.refreshClassOptions(); };
+        
+        window.handleProgressUpdate = (docs) => { 
+            window.teacherStats.allStudents = docs || []; 
+            if ($('screen-teacher-progress').classList.contains('hidden') === false) window.teacherStats.refreshClassOptions(); 
+        };
 
-        window.app = app; window.geminiService = geminiService; window.teacherMgr = teacherMgr; window.studentStudy = studentStudy; window.dataMgr = dataMgr;
-        window.onload = app.init;
+        window.onload = window.app.init;
     </script>
 </body>
 </html>
